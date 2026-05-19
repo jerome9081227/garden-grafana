@@ -1,9 +1,7 @@
 {
   "kind": "Dashboard",
   "apiVersion": "dashboard.grafana.app/v1beta1",
-  "metadata": {
-    "name": "mammotion-garden"
-  },
+  "metadata": { "name": "mammotion-garden" },
   "spec": {
     "title": "Mammotion Garden Dashboard",
     "uid": "mammotion-garden",
@@ -12,8 +10,9 @@
     "time": { "from": "now-24h", "to": "now" },
     "schemaVersion": 39,
     "panels": [
+
       { "id": 1, "title": "🔋 Battery", "type": "gauge",
-        "gridPos": { "x": 0, "y": 0, "w": 4, "h": 6 },
+        "gridPos": { "x": 0, "y": 0, "w": 3, "h": 6 },
         "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "minVizValue": 0, "maxVizValue": 100 },
         "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100,
           "thresholds": { "mode": "absolute", "steps": [
@@ -22,8 +21,9 @@
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
       },
-      { "id": 2, "title": "🌿 Mowing Progress", "type": "gauge",
-        "gridPos": { "x": 4, "y": 0, "w": 4, "h": 6 },
+
+      { "id": 2, "title": "🌿 Progress", "type": "gauge",
+        "gridPos": { "x": 3, "y": 0, "w": 3, "h": 6 },
         "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "minVizValue": 0, "maxVizValue": 100 },
         "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100,
           "thresholds": { "mode": "absolute", "steps": [
@@ -32,94 +32,253 @@
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_progress\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
       },
-      { "id": 3, "title": "📐 Area Mowed", "type": "stat",
-        "gridPos": { "x": 8, "y": 0, "w": 4, "h": 3 },
+
+      { "id": 30, "title": "🔪 Blade Wear", "type": "gauge",
+        "gridPos": { "x": 6, "y": 0, "w": 3, "h": 6 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "minVizValue": 0, "maxVizValue": 100 },
+        "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": 0 }, { "color": "yellow", "value": 60 }, { "color": "red", "value": 85 }
+          ]},
+          "mappings": [] },
+          "overrides": [] },
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_blade_used_time\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()\n  |> map(fn: (r) => ({ r with _value: r._value / 100.0 * 100.0 }))" }]
+      },
+
+      { "id": 3, "title": "🏃 Activity Mode", "type": "stat",
+        "gridPos": { "x": 9, "y": 0, "w": 3, "h": 3 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value",
+          "colorMode": "background" },
+        "fieldConfig": { "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "MODE_WORKING": { "color": "green", "text": "Mowing" }, "MODE_PAUSE": { "color": "yellow", "text": "Paused" }, "MODE_RETURNING": { "color": "blue", "text": "Returning" }, "MODE_READY": { "color": "purple", "text": "Ready" }, "MODE_NOT_ACTIVE": { "color": "gray", "text": "Inactive" } } }
+          ]
+        }},
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_activity_mode\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\")\n  |> last()" }]
+      },
+
+      { "id": 4, "title": "⏱ Time Left", "type": "stat",
+        "gridPos": { "x": 12, "y": 0, "w": 3, "h": 3 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
+        "fieldConfig": { "defaults": { "unit": "m" } },
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_time_left\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
+      },
+
+      { "id": 5, "title": "💨 Mowing Speed", "type": "stat",
+        "gridPos": { "x": 15, "y": 0, "w": 3, "h": 3 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
+        "fieldConfig": { "defaults": { "unit": "velocitymph", "decimals": 2 } },
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_mowing_speed\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
+      },
+
+      { "id": 31, "title": "📐 Area Mowed", "type": "stat",
+        "gridPos": { "x": 18, "y": 0, "w": 3, "h": 3 },
         "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
         "fieldConfig": { "defaults": { "unit": "areaM2" } },
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_area\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
       },
-      { "id": 4, "title": "⏱ Elapsed Time", "type": "stat",
-        "gridPos": { "x": 12, "y": 0, "w": 4, "h": 3 },
+
+      { "id": 32, "title": "🌅 Camera Brightness", "type": "stat",
+        "gridPos": { "x": 21, "y": 0, "w": 3, "h": 3 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value", "colorMode": "background" },
+        "fieldConfig": { "defaults": {
+          "mappings": [{ "type": "value", "options": { "Light": { "color": "yellow", "text": "☀️ Light" }, "Dark": { "color": "dark-blue", "text": "🌙 Dark" } } }]
+        }},
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_camera_brightness\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\")\n  |> last()" }]
+      },
+
+      { "id": 33, "title": "⚙️ Elapsed Time", "type": "stat",
+        "gridPos": { "x": 9, "y": 3, "w": 3, "h": 3 },
         "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
-        "fieldConfig": { "defaults": { "unit": "s" } },
+        "fieldConfig": { "defaults": { "unit": "m" } },
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_elapsed_time\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
       },
-      { "id": 5, "title": "📡 Satellites (Mower)", "type": "stat",
-        "gridPos": { "x": 16, "y": 0, "w": 4, "h": 3 },
+
+      { "id": 34, "title": "📍 Position Type", "type": "stat",
+        "gridPos": { "x": 12, "y": 3, "w": 3, "h": 3 },
         "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
-        "fieldConfig": { "defaults": { "unit": "short" } },
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_device_position_type\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\")\n  |> last()" }]
+      },
+
+      { "id": 35, "title": "📡 Satellites (Robot)", "type": "stat",
+        "gridPos": { "x": 15, "y": 3, "w": 3, "h": 3 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
+        "fieldConfig": { "defaults": { "unit": "short",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": 0 }, { "color": "yellow", "value": 10 }, { "color": "green", "value": 20 }
+          ]}
+        }},
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_satellites_robot\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
       },
-      { "id": 6, "title": "📡 Satellites (Base)", "type": "stat",
-        "gridPos": { "x": 20, "y": 0, "w": 4, "h": 3 },
+
+      { "id": 36, "title": "📡 Satellites (Base)", "type": "stat",
+        "gridPos": { "x": 18, "y": 3, "w": 3, "h": 3 },
         "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
-        "fieldConfig": { "defaults": { "unit": "short" } },
+        "fieldConfig": { "defaults": { "unit": "short",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": 0 }, { "color": "yellow", "value": 10 }, { "color": "green", "value": 20 }
+          ]}
+        }},
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"rbsa2qdmxyb_satellites\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
       },
+
+      { "id": 37, "title": "🔋 Battery Cycles", "type": "stat",
+        "gridPos": { "x": 21, "y": 3, "w": 3, "h": 3 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
+        "fieldConfig": { "defaults": { "unit": "short" } },
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_battery_cycles\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
+      },
+
       { "id": 11, "title": "🔋 Battery Over Time", "type": "timeseries",
         "gridPos": { "x": 0, "y": 6, "w": 12, "h": 8 },
-        "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } },
+        "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": 0 }, { "color": "yellow", "value": 20 }, { "color": "green", "value": 50 }
+          ]}
+        }},
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: last, createEmpty: false)" }]
       },
-      { "id": 12, "title": "🌿 Progress + Area", "type": "timeseries",
+
+      { "id": 12, "title": "💨 Mowing Speed Over Time", "type": "timeseries",
         "gridPos": { "x": 12, "y": 6, "w": 12, "h": 8 },
-        "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } },
+        "fieldConfig": { "defaults": { "unit": "velocitymph", "min": 0 } },
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_mowing_speed\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)" }]
+      },
+
+      { "id": 38, "title": "🌿 Progress + Area Over Time", "type": "timeseries",
+        "gridPos": { "x": 0, "y": 14, "w": 12, "h": 8 },
+        "fieldConfig": { "defaults": { "unit": "percent" },
+          "overrides": [{ "matcher": { "id": "byName", "options": "yuka_vpt77xyt_area" },
+            "properties": [{ "id": "unit", "value": "areaM2" }, { "id": "custom.axisPlacement", "value": "right" }]
+          }]
+        },
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_progress\" or r[\"entity_id\"] == \"yuka_vpt77xyt_area\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: last, createEmpty: false)\n  |> group(columns: [\"entity_id\"])" }]
       },
-      { "id": 13, "title": "⚡ Battery Drain Rate", "type": "timeseries",
-        "gridPos": { "x": 0, "y": 14, "w": 12, "h": 8 },
+
+      { "id": 39, "title": "⚡ Battery Drain Rate (% per hour)", "type": "timeseries",
+        "gridPos": { "x": 12, "y": 14, "w": 12, "h": 8 },
         "fieldConfig": { "defaults": { "unit": "percent" } },
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_battery\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: last, createEmpty: false)\n  |> derivative(unit: 1h, nonNegative: false)" }]
       },
-      { "id": 14, "title": "📐 Area Per Hour", "type": "timeseries",
-        "gridPos": { "x": 12, "y": 14, "w": 12, "h": 8 },
-        "fieldConfig": { "defaults": { "unit": "areaM2" } },
+
+      { "id": 40, "title": "🚨 Last Error Log", "type": "logs",
+        "gridPos": { "x": 0, "y": 22, "w": 24, "h": 6 },
+        "options": { "showTime": true, "showLabels": true, "sortOrder": "Descending" },
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_area\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: last, createEmpty: false)\n  |> derivative(unit: 1h, nonNegative: true)" }]
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_last_error\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\")\n  |> filter(fn: (r) => r[\"_value\"] != \"No Error\")" }]
       },
-      { "id": 15, "title": "🔪 Blade Wear", "type": "timeseries",
-        "gridPos": { "x": 0, "y": 22, "w": 12, "h": 8 },
-        "fieldConfig": { "defaults": { "unit": "short" } },
-        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -7d)\n  |> filter(fn: (r) => r[\"entity_id\"] =~ /yuka_vpt77xyt_blade/)\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 1h, fn: last, createEmpty: false)\n  |> group(columns: [\"entity_id\"])" }]
+
+      { "id": 13, "title": "📡 Satellites Over Time (Mower vs Base)", "type": "timeseries",
+        "gridPos": { "x": 0, "y": 28, "w": 12, "h": 8 },
+        "fieldConfig": { "defaults": { "unit": "short", "min": 0 } },
+        "targets": [
+          { "datasource": { "type": "influxdb", "uid": "influxdb" }, "legendFormat": "Robot",
+            "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_satellites_robot\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: last, createEmpty: false)" },
+          { "datasource": { "type": "influxdb", "uid": "influxdb" }, "legendFormat": "Base",
+            "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"rbsa2qdmxyb_satellites\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: last, createEmpty: false)" },
+          { "datasource": { "type": "influxdb", "uid": "influxdb" }, "legendFormat": "L1 Co-view",
+            "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_l1_satellites_co_viewing\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: last, createEmpty: false)" },
+          { "datasource": { "type": "influxdb", "uid": "influxdb" }, "legendFormat": "L2 Co-view",
+            "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_l2_satellites_co_viewing\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: last, createEmpty: false)" }
+        ]
       },
-      { "id": 16, "title": "📅 Daily Mowing Time", "type": "barchart",
-        "gridPos": { "x": 12, "y": 22, "w": 12, "h": 8 },
-        "fieldConfig": { "defaults": { "unit": "s" } },
+
+      { "id": 14, "title": "📶 Signal Strength Over Time", "type": "timeseries",
+        "gridPos": { "x": 12, "y": 28, "w": 12, "h": 8 },
+        "fieldConfig": { "defaults": { "unit": "dBm" } },
+        "targets": [
+          { "datasource": { "type": "influxdb", "uid": "influxdb" }, "legendFormat": "WiFi (Mower)",
+            "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_wi_fi_rssi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: mean, createEmpty: false)" },
+          { "datasource": { "type": "influxdb", "uid": "influxdb" }, "legendFormat": "Mobile",
+            "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_mobile_rssi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: mean, createEmpty: false)" },
+          { "datasource": { "type": "influxdb", "uid": "influxdb" }, "legendFormat": "WiFi (Base)",
+            "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"rbsa2qdmxyb_wi_fi_rssi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: mean, createEmpty: false)" }
+        ]
+      },
+
+      { "id": 41, "title": "📅 Daily Mowing Time (7 days)", "type": "barchart",
+        "gridPos": { "x": 0, "y": 36, "w": 12, "h": 8 },
+        "fieldConfig": { "defaults": { "unit": "m" } },
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -7d)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_elapsed_time\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 1d, fn: max, createEmpty: false)" }]
       },
-      { "id": 18, "title": "📡 L1 vs L2 Satellites", "type": "timeseries",
-        "gridPos": { "x": 0, "y": 30, "w": 12, "h": 8 },
-        "fieldConfig": { "defaults": { "unit": "short", "min": 0 } },
+
+      { "id": 42, "title": "📐 Daily Area Mowed (7 days)", "type": "barchart",
+        "gridPos": { "x": 12, "y": 36, "w": 12, "h": 8 },
+        "fieldConfig": { "defaults": { "unit": "areaM2" } },
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_l1_satellites\" or r[\"entity_id\"] == \"yuka_vpt77xyt_l2_satellites\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: last, createEmpty: false)\n  |> group(columns: [\"entity_id\"])" }]
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -7d)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_area\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 1d, fn: max, createEmpty: false)" }]
       },
-      { "id": 19, "title": "📶 Signal Strength", "type": "timeseries",
-        "gridPos": { "x": 12, "y": 30, "w": 12, "h": 8 },
-        "fieldConfig": { "defaults": { "unit": "dBm" } },
+
+      { "id": 43, "title": "🚗 Total Lifetime Mileage", "type": "stat",
+        "gridPos": { "x": 0, "y": 44, "w": 6, "h": 4 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name" },
+        "fieldConfig": { "defaults": { "unit": "lengthkm" } },
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
-          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_wi_fi_rssi\" or r[\"entity_id\"] == \"yuka_vpt77xyt_ble_rssi\" or r[\"entity_id\"] == \"yuka_vpt77xyt_mobile_rssi\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 5m, fn: mean, createEmpty: false)\n  |> group(columns: [\"entity_id\"])" }]
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_total_mileage\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
       },
-      { "id": 21, "title": "📍 GPS Latitude", "type": "timeseries",
-        "gridPos": { "x": 0, "y": 38, "w": 12, "h": 8 },
+
+      { "id": 44, "title": "⏱ Total Lifetime Work Hours", "type": "stat",
+        "gridPos": { "x": 6, "y": 44, "w": 6, "h": 4 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name" },
+        "fieldConfig": { "defaults": { "unit": "h" } },
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_total_work_time\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
+      },
+
+      { "id": 45, "title": "🔪 Blade Hours Used", "type": "stat",
+        "gridPos": { "x": 12, "y": 44, "w": 6, "h": 4 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name" },
+        "fieldConfig": { "defaults": { "unit": "h",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": 0 }, { "color": "yellow", "value": 60 }, { "color": "red", "value": 85 }
+          ]}
+        }},
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_blade_used_time\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
+      },
+
+      { "id": 46, "title": "🔋 Battery Cycles (lifetime)", "type": "stat",
+        "gridPos": { "x": 18, "y": 44, "w": 6, "h": 4 },
+        "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name" },
+        "fieldConfig": { "defaults": { "unit": "short",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": 0 }, { "color": "yellow", "value": 300 }, { "color": "red", "value": 500 }
+          ]}
+        }},
+        "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"homeassistant\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_battery_cycles\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()" }]
+      },
+
+      { "id": 21, "title": "📍 GPS Latitude (Mower)", "type": "timeseries",
+        "gridPos": { "x": 0, "y": 48, "w": 12, "h": 8 },
         "fieldConfig": { "defaults": { "unit": "degree", "decimals": 7 } },
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_latitude\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 1m, fn: last, createEmpty: false)" }]
       },
-      { "id": 22, "title": "📍 GPS Longitude", "type": "timeseries",
-        "gridPos": { "x": 12, "y": 38, "w": 12, "h": 8 },
+
+      { "id": 22, "title": "📍 GPS Longitude (Mower)", "type": "timeseries",
+        "gridPos": { "x": 12, "y": 48, "w": 12, "h": 8 },
         "fieldConfig": { "defaults": { "unit": "degree", "decimals": 7 } },
         "targets": [{ "datasource": { "type": "influxdb", "uid": "influxdb" },
           "query": "from(bucket: \"homeassistant\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r[\"entity_id\"] == \"yuka_vpt77xyt_longitude\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: 1m, fn: last, createEmpty: false)" }]
       }
+
     ]
   }
 }
